@@ -1,0 +1,75 @@
+Gradle 学习
+
+一、Gradle DSL 基础
+
+1. 描述：Gradle 实质为配置脚本，执行一种类型的 配置脚本 就会 创建一个关联的对象，如：执行 Build Script 脚本就会创建一个 Project 对象，这个对象其实就是 Gradle 的代理对象。
+
+2. 各类型 Gradle 对应的对象类型：
+--------------------------------
+   脚本类型         关联对象类型
+--------------------------------
+ Init script          Gradle
+ Build script        Project
+Settings script      Settings
+--------------------------------
+
+3. Gradle 三种主要对象解释如下：
+- Gradle对象：1）构建初始化时创建，整个构建执行过程就只有这一个对象，一般很少修改该默认脚本；
+              2）若需要重写初始化脚本 Init script，则按规则放置在 gradle-3.3/init.d/目录下；
+              3）初始化脚本的 Gradle 对象代表了 Gradle 的调运，可以通过调运 Project.getGradle() 方法获取 Gradle 实例对象。
+- Project对象：每个 build.gradle 会转化为一个 Project 对象；
+- Settings对象：1）每个 settings.gradle 会转化为一个 Settings 对象。
+
+二、Build 生命周期
+
+1. Gradle 构建脚本生命周期三部曲
+
+1）Initialization
+- 实质为执行 settings.gradle 脚本。
+- 根据 settings.gradle 中的项目配置，在初始化阶段 Gradle 决定哪些项目需要加入构建，并且为这些项目分别创建 Project 实例。
+- 所以，执行 task 时，最开始执行 settings.gradle 中的内容。
+- 注：settings.gradle 中不能创建 task，会找不到 task() 方法。
+
+2）Configuration
+- 实质为解析每个被加入构建项目的 build.gradle 脚本。
+- 确定整个 build 的 Project 及 Task 之间的关系；
+- 建立一个有向图来描述 Task 之间的依赖关系。
+
+3）Execution
+- 执行 Gradle 命令；
+- 也即是执行一些指定 task 名的 task任务 及其 依赖task 进行最终走件目标的生成等。
+
+
+三、Gradle 构建基础
+
+说明：
+- 每一个 Gradle 构建 都是由 一个或多个 project 构成；
+- 每一个 project 都是由 一个或多个 tasks 构成；
+- 每一个 task 的实质其实是一些更加细化的构建（如编译class，创建jar文件等）。
+
+1. 任务 task 基础
+
+案例：task 有无 action 的区别。
+```
+// 有Action的task
+task actionTask doLast {
+    println 'I am actionTask'
+}
+
+// 无Action的task
+task noActionTask {
+    println 'I am noActionTask'
+}
+```
+
+结果：
+- task 没有加 action，如 doLast，doFirst，则这个任务就是在 脚本初始化 initialization 阶段执行（无论执行什么task都会被执行）；
+- task 带有 action，则在控制台执行命令 ./gradlew actionTask 后才会触发执行。
+- 原因：定义一个 task 其实就是定义一个 task(String name) 方法。
+- 不带 action 的，闭包在 task 方法返回前执行；添加了 action 的，则实际是调用 actionTask.doLast()，会等到 ./gradlew actionTask 时执行。
+
+
+
+
+
+

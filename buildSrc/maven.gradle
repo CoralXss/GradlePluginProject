@@ -1,0 +1,19 @@
+apply plugin: 'maven'
+
+repositories {
+    mavenCentral()
+}
+
+targetCompatibility = '1.7'
+sourceCompatibility = '1.7'
+
+group='com.coral.plugin'
+version='1.0.0'
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: uri('../repo'))
+        }
+    }
+}

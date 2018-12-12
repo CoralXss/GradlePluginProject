@@ -1,0 +1,141 @@
+/***
+ * Build 生命周期：
+ *
+ */
+
+
+
+
+/**
+ * 场景一：./gradlew test0
+ * Gradle 执行结果:
+ * - settings.gradle 初始化打印：This is executed during the initialization phase .
+ * - Configure project :app 阶段打印：、
+ *     This is executed during the configuration phase .
+ *     task configured: This is also executed during the initialization phase .
+ *     task testBoth: This is executed first during the configuration phase as well .
+ * - Task :app:test0 阶段打印：task test: This is executed during the execution phase .
+ *
+ * 几种打印场景：
+ * 1）直接在 .gradle 中调用 println() 方法打印；
+ * 2）在 无Action 的 task 中调用 println()；
+ * 3）在 有Action 的 task 中调用 println()；（使用 doFirst 或 doLast）
+ *
+ * 上述三种场景的区别在于：
+ * - task没有加 doLast 和 doFirst 操作，这个任务在脚本初始化 Initialization 阶段执行（无论是什么task都会执行）；
+ * - task 加了这些 Action 操作，则在 gradle task 命令执行时才会执行。
+ * - 原因：没有添加 << 时，闭包在 task 函数返回前执行，而加了 << 则变成调用 actionTask.doLast()，会等到 gradle actionTask 时执行。
+ */
+
+//------------------------- 一、gradle 生命周期 -----------------------
+// 配置阶段按顺序打印
+println("This is executed during the configuration phase .")
+println(project.getGradle()) // 打印：build 'GradlePluginProject'
+println(project)             // 打印：project ':app'
+
+task configuared {
+    // 配置阶段按顺序打印
+    println("task configured: This is also executed during the initialization phase .")
+}
+
+task test0 << {
+    // 配置阶段按顺序打印
+    println("task test: This is executed during the execution phase .")
+}
+
+task testBoth {
+    doFirst {
+        // :app 项目执行阶段打印
+        println("task testBoth: This is executed first during the execution phase .")
+    }
+    doLast {
+        // :app 项目执行阶段打印
+        println("task testBoth: This is executed last during the execution phase .")
+    }
+    // 配置阶段按顺序打印
+    println("task testBoth: This is executed during the configuration phase as well .")
+}
+
+//------------------------- 二、task 任务依赖 -----------------------
+
+// 案例一：任务task依赖
+task('taskX', dependsOn: 'taskY') doLast {
+    println('taskX executed .')
+}
+
+task('taskY') doLast {
+    println('taskY executed .')
+}
+
+/**
+ * 打印结果：
+ * > Task :app:taskY
+ * taskY executed .
+ *
+ * > Task :app:taskX
+ * taskX executed .
+ */
+
+// 案例二：动态任务task（编译出错）
+//times { counter ->
+//    task "dynamicTask$counter" doLast {
+//        println("I am task number $counter")
+//    }
+//}
+
+// 案例三：通过 API 为任务添加一些新行为
+task('hello') doLast {
+    println('Hello Earth')  // 在 hello 任务执行时打印 Hello Earth
+}
+
+hello.doFirst {
+    println('Hello Venus')  // 在 hello 任务执行前打印 Hello Venus
+}
+
+hello.doLast {
+    println('Hello Mars')   // 在 hello 任务执行后打印 Hello Mars
+}
+
+hello.doLast {
+    println('Hello Jupiter')   // 在 hello 任务执行后打印 Hello Jupiter
+}
+
+/**
+ * 打印结果：
+ * > Task :app:hello
+    Hello Venus
+    Hello Earth
+    Hello Mars
+    Hello Jupiter
+ * 说明：doFirst 和 doLast 可以被执行多次。
+ */
+
+
+//------------------------- 三、自定义task属性 -----------------------
+task myTask {
+    ext.myProperty = 'myValue'
+}
+
+task('printTaskProperties') doLast {
+    println myTask.myProperty    // 打印 myValue
+}
+
+
+//------------------------- 四、定义默认task -----------------------
+
+defaultTasks 'clean0', 'run'
+
+task('clean0') doLast {
+    println('Default clean task')
+}
+
+task('run') doLast {
+    println('Default run task')
+}
+
+task('other') doLast {
+    println('I am not a default task')
+}
+
+
+

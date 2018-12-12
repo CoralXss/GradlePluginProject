@@ -1,0 +1,17 @@
+include ':app', ':buildSrc'
+
+println("This is executed during the initialization phase .")
+
+//rootProject.name = 'main'
+
+def moduleName = 'load_core'
+def file = file('/Users/xss/Documents/AndroidStudioProjects/file_load_util_android/load_core')
+include(":${moduleName}")
+project(":${moduleName}").projectDir = file
+
+
+//project(':app').buildFileName = ""
+//project(':app').buildFile = '/Users/xss/Desktop/build01.gradle'
+
+println(settingsDir)
+
