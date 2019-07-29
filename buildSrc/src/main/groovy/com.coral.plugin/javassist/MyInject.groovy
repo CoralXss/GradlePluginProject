@@ -1,5 +1,6 @@
 package com.coral.plugin.javassist
 
+import com.coral.plugin.CallFinish
 import javassist.ClassPool
 import javassist.CtClass
 import javassist.CtConstructor
@@ -64,6 +65,46 @@ public class MyInject {
         }
     }
 
+    public static void injectCallFinishAnnotationMethod(String path, Project project) {
+        classPool.appendClassPath(path)
+        classPool.appendClassPath(project.android.bootClasspath[0].toString())
+
+        // 读取 Dharma_Mapping_Manager_ 生成类的 field，进行拆分，
+
+        File dir = new File(path)
+        if (dir.isDirectory()) {
+            dir.eachFileRecurse { File file ->
+                String filePath = file.absolutePath
+                if (file.getName().contains("Dharma_Mapping_Manager_")) {
+                    // 获取 MainActivity
+                    CtClass ctClass = classPool.getCtClass("com.coral.demo.MainActivity")
+                    println("ctClass = " + ctClass)
+
+                    // 解冻
+                    if (ctClass.isFrozen()) {
+                        ctClass.defrost()
+                    }
+
+                    CtMethod ctMethod0 = ctClass.getDeclaredMethod("test")
+                    println("ctMethod = " + ctMethod0 + ", " + ctMethod0.hasAnnotation(CallFinish.class))
+
+                    // 获取到 onCreate() 方法
+                    CtMethod ctMethod = ctClass.getDeclaredMethod("onCreate")
+                    if (ctMethod.hasAnnotation(CallFinish.class)) {
+                        ctMethod.getAnnotation(CallFinish.class)
+
+                        String insertBeforeStr = """android.util.Log.e("--->", "Hello");"""
+
+                        ctMethod.insertBefore(insertBeforeStr)
+                        ctClass.writeFile(path)
+                        ctClass.detach()
+                    }
+
+                }
+            }
+        }
+    }
+
 
     public static void injectOnCreate(String path, Project project) {
         classPool.appendClassPath(path)
@@ -76,25 +117,33 @@ public class MyInject {
                 String filePath = file.absolutePath
                 if (file.getName().equals("MainActivity.class")) {
                     // 获取 MainActivity
-                    CtClass ctClass = classPool.getCtClass("com.coral.demo.MainActivity")
-                    println("ctClass = " + ctClass)
+                    println(file.getPath())
 
-                    // 解冻
-                    if (ctClass.isFrozen()) {
-                        ctClass.defrost()
-                    }
-
-                    // 获取到 onCreate() 方法
-                    CtMethod ctMethod = ctClass.getDeclaredMethod("onCreate")
-                    println("ctMethod = " + ctMethod)
-
-                    String insertBeforeStr = """android.util.Log.e("--->", "Hello");"""
-
-                    ctMethod.insertBefore(insertBeforeStr)
-                    ctClass.writeFile(path)
-                    ctClass.detach()
                 }
             }
+        }
+
+        CtClass ctClass = classPool.getCtClass("com.coral.demo.MainActivity")
+        println("ctClass = " + ctClass)
+
+        // 解冻
+        if (ctClass.isFrozen()) {
+            ctClass.defrost()
+        }
+
+        CtMethod ctMethod0 = ctClass.getDeclaredMethod("test")
+        println("ctMethod = " + ctMethod0 + ", " + ctMethod0.hasAnnotation(CallFinish.class))
+
+        // 获取到 onCreate() 方法
+        CtMethod ctMethod = ctClass.getDeclaredMethod("test")
+        if (ctMethod.hasAnnotation(CallFinish.class)) {
+            ctMethod.getAnnotation(CallFinish.class);
+
+            String insertBeforeStr = """android.util.Log.e("--->", "Hello");"""
+
+            ctMethod.insertBefore(insertBeforeStr)
+            ctClass.writeFile(path)
+            ctClass.detach()
         }
     }
 }

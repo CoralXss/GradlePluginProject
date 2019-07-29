@@ -1,26 +1,32 @@
+import com.coral.plugin.CustomTask
+
 apply plugin: 'com.android.application'
 
-apply plugin: 'myPlugin'
-
-apply from: 'sample01.gradle'
-
-// 带参数的插件
+//apply plugin: 'myPlugin'
+//
+//apply from: 'sample01.gradle'
+//
+//
+//// 带参数的插件
 apply plugin: 'myPluginWithParams'
 testPluginExt {
     params1 = 'Hi, Param1'
     params2 = 'Hi, Param2'
 }
+//
+//// 参数嵌套问题
+//coralline {
+//    address {
+//        province 'Hubei'
+//        city 'Xiaogan'
+//    }
+//    name 'Coralline'
+//}
 
-// 参数嵌套问题
-coralline {
-    address {
-        province 'Hubei'
-        city 'Xiaogan'
-    }
-    name 'Coralline'
-}
+// DharmaPlugin
+//apply plugin: 'dharma'
 
-// transform 插件
+// MyTransform 插件
 //apply plugin: 'myPluginWithTransform'
 
 //// 自动生成 Java 类插件
@@ -52,5 +58,9 @@ dependencies {
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
 
-//    implementation('plugin')
+    implementation project(':base')
+
+    annotationProcessor project(':compiler')
 }
+
+//apply plugin: 'android-apt'

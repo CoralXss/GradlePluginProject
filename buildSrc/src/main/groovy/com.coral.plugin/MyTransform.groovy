@@ -82,10 +82,10 @@ public class MyTransform extends Transform {
             // 1) 对类型为"目录"的 input 进行遍历
             input.directoryInputs.each { DirectoryInput dirInput ->
                 // demo1. 在MainActivity的onCreate()方法之前注入代码
-//                MyInject.injectOnCreate(dirInput.file.absolutePath, project)
+                MyInject.injectOnCreate(dirInput.file.absolutePath, project)
 
                 // demo2. 在构造方法时新增代码（文件夹中包含我们手写的类以及 R.class，BuildConfigClass 和 R$Xxx.class 等）
-                MyInject.injectDir(dirInput.file.absolutePath, "com/coral/demo")
+//                MyInject.injectDir(dirInput.file.absolutePath, "com/coral/demo")
 
                 // 获取 output 目录
                 def dest = outputProvider.getContentLocation(dirInput.name, dirInput.contentTypes,

@@ -1,9 +1,8 @@
 package com.coral.plugin
 
-import com.android.build.gradle.AppPlugin
+import com.android.build.gradle.AppExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import com.android.build.gradle.AppExtension
 
 /**
  * Created by xss on 2018/11/20.
